@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                    String   @id @default(cuid())
+  name                  String
+  businessId            String   @unique
+  address               String?
+  city                  String?
+  postalCode            String?
+  country               String   @default("FI")
+  vatLiable             Boolean  @default(true)
+  vatReportingPeriod    String   @default("monthly")
+  fiscalYearEnd         String   @default("12-31")
+  languagePreference    String   @default("sv")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  users                 User[]
+  accounts              Account[]
+  transactions          Transaction[]
+  invoices              Invoice[]
+  customers             Customer[]
+  expenses              Expense[]
+  
+  @@map("companies")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String
+  role          String   @default("user")
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  expenses      Expense[]
+  
+  @@map("users")
+}
+
+model Account {
+  id              String   @id @default(cuid())
+  accountNumber   String
+  nameSv          String
+  nameFi          String
+  descriptionSv   String?
+  descriptionFi   String?
+  type            String
+  vatRate         Float?
+  isActive        Boolean  @default(true)
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  
+  transactionLines TransactionLine[]
+  
+  @@unique([companyId, accountNumber])
+  @@map("accounts")
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  date            DateTime
+  description     String
+  voucherNumber   String
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  lines           TransactionLine[]
+  
+  @@map("transactions")
+}
+
+model TransactionLine {
+  id              String      @id @default(cuid())
+  transactionId   String
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  accountId       String
+  account         Account     @relation(fields: [accountId], references: [id])
+  debit           Float       @default(0)
+  credit          Float       @default(0)
+  description     String?
+  
+  @@map("transaction_lines")
+}
+
+model Customer {
+  id              String   @id @default(cuid())
+  name            String
+  businessId      String?
+  email           String?
+  phone           String?
+  address         String?
+  city            String?
+  postalCode      String?
+  country         String   @default("FI")
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  invoices        Invoice[]
+  
+  @@map("customers")
+}
+
+model Invoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+  issueDate       DateTime
+  dueDate         DateTime
+  status          String   @default("draft")
+  subtotal        Float
+  vatAmount       Float
+  total           Float
+  notes           String?
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  lines           InvoiceLine[]
+  
+  @@unique([companyId, invoiceNumber])
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description     String
+  quantity        Float
+  unitPrice       Float
+  vatRate         Float
+  amount          Float
+  
+  @@map("invoice_lines")
+}
+
+model Expense {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  date            DateTime
+  amount          Float
+  category        String
+  description     String
+  receiptUrl      String?
+  status          String   @default("pending")
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("expenses")
+}
