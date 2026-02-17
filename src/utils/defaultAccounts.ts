@@ -1,0 +1,18 @@
+export const FINNISH_CHART_OF_ACCOUNTS = [
+  { accountNumber: '1000', nameSv: 'Anläggningstillgångar', nameFi: 'Pysyvät vastaavat', type: 'asset' },
+  { accountNumber: '1700', nameSv: 'Kundfordringar', nameFi: 'Myyntisaamiset', type: 'asset' },
+  { accountNumber: '1900', nameSv: 'Kassa och bank', nameFi: 'Rahat ja pankkisaamiset', type: 'asset' },
+  { accountNumber: '2000', nameSv: 'Eget kapital', nameFi: 'Oma pääoma', type: 'equity' },
+  { accountNumber: '2600', nameSv: 'Leverantörsskulder', nameFi: 'Ostovelat', type: 'liability' },
+  { accountNumber: '2939', nameSv: 'Momsskuld', nameFi: 'ALV-velka', type: 'liability' },
+  { accountNumber: '2940', nameSv: 'Momsfordran', nameFi: 'ALV-saatava', type: 'asset' },
+  { accountNumber: '3010', nameSv: 'Försäljning 25,5% moms', nameFi: 'Myynti 25,5% ALV', type: 'income', vatRate: 25.5 },
+  { accountNumber: '3020', nameSv: 'Försäljning 14% moms', nameFi: 'Myynti 14% ALV', type: 'income', vatRate: 14 },
+  { accountNumber: '3030', nameSv: 'Försäljning 10% moms', nameFi: 'Myynti 10% ALV', type: 'income', vatRate: 10 },
+  { accountNumber: '3040', nameSv: 'Momsfri försäljning', nameFi: 'Veroton myynti', type: 'income', vatRate: 0 },
+  { accountNumber: '4000', nameSv: 'Inköp material', nameFi: 'Materiaalit', type: 'expense' },
+  { accountNumber: '5000', nameSv: 'Personalkostnader', nameFi: 'Henkilöstökulut', type: 'expense' },
+  { accountNumber: '7000', nameSv: 'Övriga kostnader', nameFi: 'Muut kulut', type: 'expense' },
+  { accountNumber: '7200', nameSv: 'Lokalkostnader', nameFi: 'Toimitilakulut', type: 'expense' },
+  { accountNumber: '7600', nameSv: 'IT och telefoni', nameFi: 'IT- ja puhelinkulut', type: 'expense' },
+];

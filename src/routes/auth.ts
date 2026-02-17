@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { FINNISH_CHART_OF_ACCOUNTS } from '../utils/defaultAccounts';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -11,8 +12,6 @@ router.post('/register', async (req, res) => {
     const { companyName, businessId, email, password, name } = req.body;
     
     const passwordHash = await bcrypt.hash(password, 10);
-    
-    // Använd businessId om det finns, annars generera ett dummy
     const finalBusinessId = businessId || `TEMP-${Date.now()}`;
     
     const company = await prisma.company.create({
@@ -26,6 +25,9 @@ router.post('/register', async (req, res) => {
             name: name || email.split('@')[0],
             role: 'admin'
           }
+        },
+        accounts: {
+          create: FINNISH_CHART_OF_ACCOUNTS
         }
       },
       include: { users: true }
