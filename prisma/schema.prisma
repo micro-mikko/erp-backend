@@ -75,6 +75,8 @@ model Transaction {
   voucherNumber   String?
   categoryId      String?
   subcategoryId   String?
+  customerId      String?
+  supplierId      String?
   companyId       String
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
@@ -108,6 +110,7 @@ model Customer {
   city            String?
   postalCode      String?
   country         String   @default("FI")
+  type            String   @default("customer")
   companyId       String
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
