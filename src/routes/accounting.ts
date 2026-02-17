@@ -144,3 +144,25 @@ router.put('/transactions/:id', async (req: AuthRequest, res) => {
     res.status(500).json({ error: error.message || 'Kunde inte uppdatera verifikat' });
   }
 });
+
+router.delete('/transactions/:id', async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+
+    const existing = await prisma.transaction.findFirst({
+      where: { id, companyId: req.user!.companyId }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Verifikat hittades inte' });
+    }
+
+    await prisma.transactionLine.deleteMany({ where: { transactionId: id } });
+    await prisma.transaction.delete({ where: { id } });
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Error deleting transaction:', error);
+    res.status(500).json({ error: 'Kunde inte ta bort verifikat' });
+  }
+});
