@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { authRouter } from './routes/auth';
 
 dotenv.config();
 
@@ -14,12 +15,18 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use('/api/auth', authRouter);
+
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok',
     message: 'ERP Backend fungerar! 🚀',
     timestamp: new Date().toISOString()
   });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 const PORT = process.env.PORT || 4000;
