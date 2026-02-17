@@ -3,6 +3,12 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { authRouter } from './routes/auth';
+import { accountingRouter } from './routes/accounting';
+import { invoiceRouter } from './routes/invoices';
+import { customerRouter } from './routes/customers';
+import { expenseRouter } from './routes/expenses';
+import { vatRouter } from './routes/vat';
+import { dashboardRouter } from './routes/dashboard';
 
 dotenv.config();
 
@@ -16,6 +22,12 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
+app.use('/api/accounting', accountingRouter);
+app.use('/api/invoices', invoiceRouter);
+app.use('/api/customers', customerRouter);
+app.use('/api/expenses', expenseRouter);
+app.use('/api/vat', vatRouter);
+app.use('/api/dashboard', dashboardRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ 
