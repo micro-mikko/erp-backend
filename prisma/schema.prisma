@@ -72,7 +72,9 @@ model Transaction {
   id              String   @id @default(cuid())
   date            DateTime
   description     String
-  voucherNumber   String
+  voucherNumber   String?
+  categoryId      String?
+  subcategoryId   String?
   companyId       String
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
