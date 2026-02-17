@@ -22,3 +22,51 @@ router.get('/', async (req: AuthRequest, res) => {
 });
 
 export { router as customerRouter };
+
+router.post('/', async (req: AuthRequest, res) => {
+  try {
+    const { name, businessId, email, phone, address, city, postalCode, country } = req.body;
+    const customer = await prisma.customer.create({
+      data: {
+        name,
+        businessId,
+        email,
+        phone,
+        address,
+        city,
+        postalCode,
+        country: country || 'FI',
+        type: 'customer',
+        companyId: req.user!.companyId
+      }
+    });
+    res.status(201).json(customer);
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    res.status(500).json({ error: 'Kunde inte skapa kund' });
+  }
+});
+
+router.put('/:id', async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { name, businessId, email, phone, address, city, postalCode, country } = req.body;
+    const customer = await prisma.customer.update({
+      where: { id, companyId: req.user!.companyId },
+      data: { name, businessId, email, phone, address, city, postalCode, country }
+    });
+    res.json(customer);
+  } catch (error) {
+    res.status(500).json({ error: 'Kunde inte uppdatera kund' });
+  }
+});
+
+router.delete('/:id', async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.customer.delete({ where: { id, companyId: req.user!.companyId } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Kunde inte ta bort kund' });
+  }
+});
