@@ -9,6 +9,7 @@ import { customerRouter } from './routes/customers';
 import { expenseRouter } from './routes/expenses';
 import { vatRouter } from './routes/vat';
 import { dashboardRouter } from './routes/dashboard';
+import { usersRouter } from './routes/users';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/customers', customerRouter);
 app.use('/api/expenses', expenseRouter);
 app.use('/api/vat', vatRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ 
