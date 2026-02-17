@@ -12,15 +12,18 @@ router.post('/register', async (req, res) => {
     
     const passwordHash = await bcrypt.hash(password, 10);
     
+    // Använd businessId om det finns, annars generera ett dummy
+    const finalBusinessId = businessId || `TEMP-${Date.now()}`;
+    
     const company = await prisma.company.create({
       data: {
-        name: companyName,
-        businessId,
+        name: companyName || 'Mitt Företag',
+        businessId: finalBusinessId,
         users: {
           create: {
             email,
             passwordHash,
-            name,
+            name: name || email.split('@')[0],
             role: 'admin'
           }
         }
