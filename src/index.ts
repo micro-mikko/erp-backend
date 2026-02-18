@@ -10,9 +10,6 @@ import { expenseRouter } from './routes/expenses';
 import { vatRouter } from './routes/vat';
 import { dashboardRouter } from './routes/dashboard';
 import { usersRouter } from './routes/users';
-import { categoriesRouter } from './routes/categories';
-import { suppliersRouter } from './routes/suppliers';
-import { dashboardV2Router } from './routes/dashboard-v2';
 
 dotenv.config();
 
@@ -33,9 +30,6 @@ app.use('/api/expenses', expenseRouter);
 app.use('/api/vat', vatRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/categories', categoriesRouter);
-app.use('/api/suppliers', suppliersRouter);
-app.use('/api/dashboard-v2', dashboardV2Router);
 
 app.get('/api/health', (req, res) => {
   res.json({ 
