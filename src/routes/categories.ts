@@ -2,96 +2,65 @@ import { Router } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
 router.use(authenticate);
 
-const TRANSACTION_CATEGORIES = [
+// Hårdkodade kategorier (kan senare flyttas till databas)
+const CATEGORIES = [
   {
-    id: 'revenue',
-    label: 'Intäkter',
+    id: 'income',
+    name: 'Intäkter',
     subcategories: [
-      { id: 'revenue_products', label: 'Produktförsäljning', accounts: { debit: '1910', credit: '3000' } },
-      { id: 'revenue_consulting', label: 'Tjänsteförsäljning / Consulting', accounts: { debit: '1910', credit: '3010' } },
-      { id: 'revenue_recurring', label: 'Återkommande intäkter (SaaS/abonnemang)', accounts: { debit: '1910', credit: '3020' } },
-      { id: 'revenue_interest', label: 'Ränteintäkter', accounts: { debit: '1910', credit: '3030' } }
+      { id: 'sales-25', name: 'Försäljning 25,5% moms', accounts: { debit: '1900', credit: '3010' } },
+      { id: 'sales-14', name: 'Försäljning 14% moms', accounts: { debit: '1900', credit: '3020' } },
+      { id: 'sales-10', name: 'Försäljning 10% moms', accounts: { debit: '1900', credit: '3030' } },
+      { id: 'sales-0', name: 'Momsfri försäljning', accounts: { debit: '1900', credit: '3040' } }
     ]
   },
   {
     id: 'personnel',
-    label: 'Personalkostnader',
+    name: 'Personalkostnader',
     subcategories: [
-      { id: 'personnel_salary', label: 'Löner', accounts: { debit: '5000', credit: '1910' } },
-      { id: 'personnel_social', label: 'Arbetsgivaravgifter', accounts: { debit: '5100', credit: '2940' } },
-      { id: 'personnel_pension', label: 'Pensionskostnader', accounts: { debit: '5200', credit: '2950' } },
-      { id: 'personnel_travel', label: 'Reseersättning', accounts: { debit: '5300', credit: '1910' } }
-    ]
-  },
-  {
-    id: 'premises',
-    label: 'Lokalkostnader',
-    subcategories: [
-      { id: 'premises_rent', label: 'Hyra', accounts: { debit: '5400', credit: '1910' } },
-      { id: 'premises_energy', label: 'El & värme', accounts: { debit: '5410', credit: '1910' } },
-      { id: 'premises_cleaning', label: 'Städning & underhåll', accounts: { debit: '5420', credit: '1910' } }
+      { id: 'salary', name: 'Lön', accounts: { debit: '5000', credit: '1900' } },
+      { id: 'social', name: 'Sociala avgifter', accounts: { debit: '5000', credit: '1900' } }
     ]
   },
   {
     id: 'it',
-    label: 'IT & Kommunikation',
+    name: 'IT & Kommunikation',
     subcategories: [
-      { id: 'it_software', label: 'Programvarulicenser (SaaS)', accounts: { debit: '5500', credit: '1910' } },
-      { id: 'it_phone', label: 'Telefon & internet', accounts: { debit: '5510', credit: '1910' } },
-      { id: 'it_hardware', label: 'Hårdvara & utrustning', accounts: { debit: '5520', credit: '1910' } }
+      { id: 'software', name: 'Programvara', accounts: { debit: '7600', credit: '1900' } },
+      { id: 'telecom', name: 'Telefoni', accounts: { debit: '7600', credit: '1900' } },
+      { id: 'hosting', name: 'Hosting', accounts: { debit: '7600', credit: '1900' } }
     ]
   },
   {
-    id: 'marketing',
-    label: 'Försäljning & Marknadsföring',
+    id: 'office',
+    name: 'Lokalkostnader',
     subcategories: [
-      { id: 'marketing_ads', label: 'Annonsering', accounts: { debit: '5600', credit: '1910' } },
-      { id: 'marketing_events', label: 'Mässor & events', accounts: { debit: '5610', credit: '1910' } },
-      { id: 'marketing_representation', label: 'Representationskostnader', accounts: { debit: '5620', credit: '1910' } }
+      { id: 'rent', name: 'Hyra', accounts: { debit: '7200', credit: '1900' } },
+      { id: 'utilities', name: 'El & Uppvärmning', accounts: { debit: '7200', credit: '1900' } }
     ]
   },
   {
-    id: 'admin',
-    label: 'Administration',
+    id: 'purchases',
+    name: 'Inköp material',
     subcategories: [
-      { id: 'admin_accounting', label: 'Bokföringstjänster', accounts: { debit: '5700', credit: '1910' } },
-      { id: 'admin_legal', label: 'Juridiska tjänster', accounts: { debit: '5710', credit: '1910' } },
-      { id: 'admin_office', label: 'Kontorsmaterial', accounts: { debit: '5720', credit: '1910' } },
-      { id: 'admin_bank', label: 'Bankavgifter', accounts: { debit: '5730', credit: '1910' } }
-    ]
-  },
-  {
-    id: 'tax',
-    label: 'Skatter & Moms',
-    subcategories: [
-      { id: 'tax_vat', label: 'Momsbetalning', accounts: { debit: '2939', credit: '1910' } },
-      { id: 'tax_prepaid', label: 'Förskottsskatt', accounts: { debit: '2910', credit: '1910' } }
-    ]
-  },
-  {
-    id: 'owner',
-    label: 'Ägaruttag',
-    subcategories: [
-      { id: 'owner_dividend', label: 'Dividend / Utdelning', accounts: { debit: '2000', credit: '1910' } },
-      { id: 'owner_loan_in', label: 'Aktieägarens lån till bolaget', accounts: { debit: '1910', credit: '2800' } },
-      { id: 'owner_loan_out', label: 'Återbetalning av lån', accounts: { debit: '2800', credit: '1910' } }
+      { id: 'materials', name: 'Material & Varor', accounts: { debit: '4000', credit: '1900' } },
+      { id: 'services', name: 'Tjänster', accounts: { debit: '4000', credit: '1900' } }
     ]
   },
   {
     id: 'other',
-    label: 'Övrigt',
+    name: 'Övriga kostnader',
     subcategories: [
-      { id: 'other_depreciation', label: 'Avskrivningar', accounts: { debit: '6800', credit: '1200' } },
-      { id: 'other_deposit', label: 'Bankinsättning', accounts: { debit: '1910', credit: '2000' } },
-      { id: 'other_withdrawal', label: 'Uttag', accounts: { debit: '2000', credit: '1910' } }
+      { id: 'other-expense', name: 'Övrig kostnad', accounts: { debit: '7000', credit: '1900' } }
     ]
   }
 ];
 
-router.get('/', (req: AuthRequest, res) => {
-  res.json(TRANSACTION_CATEGORIES);
+router.get('/', async (req: AuthRequest, res) => {
+  res.json(CATEGORIES);
 });
 
 export { router as categoriesRouter };

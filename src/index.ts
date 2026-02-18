@@ -10,6 +10,7 @@ import { expenseRouter } from './routes/expenses';
 import { vatRouter } from './routes/vat';
 import { dashboardRouter } from './routes/dashboard';
 import { usersRouter } from './routes/users';
+import { categoriesRouter } from './routes/categories';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRouter);
 app.use('/api/accounting', accountingRouter);
+app.use('/api/accounting/categories', categoriesRouter);
 app.use('/api/invoices', invoiceRouter);
 app.use('/api/customers', customerRouter);
 app.use('/api/expenses', expenseRouter);
