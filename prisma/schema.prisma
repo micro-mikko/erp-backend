@@ -8,28 +8,26 @@ datasource db {
 }
 
 model Company {
-  id                    String   @id @default(cuid())
-  name                  String
-  businessId            String   @unique
-  address               String?
-  city                  String?
-  postalCode            String?
-  country               String   @default("FI")
-  vatLiable             Boolean  @default(true)
-  vatReportingPeriod    String   @default("monthly")
-  fiscalYearEnd         String   @default("12-31")
-  languagePreference    String   @default("sv")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  name                String
+  businessId          String    @unique
+  address             String?
+  city                String?
+  postalCode          String?
+  country             String    @default("FI")
+  vatLiable           Boolean   @default(true)
+  vatReportingPeriod  String    @default("monthly")
+  fiscalYearEnd       String    @default("12-31")
+  languagePreference  String    @default("sv")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
   
-  users                 User[]
-  accounts              Account[]
-  transactions          Transaction[]
-  invoices              Invoice[]
-  customers             Customer[]
-  expenses              Expense[]
-  
-  @@map("companies")
+  users               User[]
+  accounts            Account[]
+  transactions        Transaction[]
+  invoices            Invoice[]
+  customers           Customer[]
+  expenses            Expense[]
 }
 
 model User {
@@ -39,138 +37,119 @@ model User {
   name          String
   role          String   @default("user")
   companyId     String
-  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
-  expenses      Expense[]
-  
-  @@map("users")
+  company       Company  @relation(fields: [companyId], references: [id])
 }
 
 model Account {
-  id              String   @id @default(cuid())
+  id              String            @id @default(cuid())
   accountNumber   String
   nameSv          String
-  nameFi          String
-  descriptionSv   String?
-  descriptionFi   String?
+  nameFi          String?
   type            String
   vatRate         Float?
-  isActive        Boolean  @default(true)
+  isActive        Boolean           @default(true)
   companyId       String
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
+  createdAt       DateTime          @default(now())
   
+  company         Company           @relation(fields: [companyId], references: [id])
   transactionLines TransactionLine[]
   
   @@unique([companyId, accountNumber])
-  @@map("accounts")
 }
 
 model Transaction {
-  id              String   @id @default(cuid())
+  id              String            @id @default(cuid())
+  voucherNumber   String
   date            DateTime
   description     String
-  voucherNumber   String?
   categoryId      String?
   subcategoryId   String?
-  customerId      String?
-  supplierId      String?
   companyId       String
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
   
+  company         Company           @relation(fields: [companyId], references: [id])
   lines           TransactionLine[]
-  
-  @@map("transactions")
 }
 
 model TransactionLine {
   id              String      @id @default(cuid())
   transactionId   String
-  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   accountId       String
-  account         Account     @relation(fields: [accountId], references: [id])
   debit           Float       @default(0)
   credit          Float       @default(0)
   description     String?
+  vatRate         Float?
+  vatAmount       Float?
   
-  @@map("transaction_lines")
-}
-
-model Customer {
-  id              String   @id @default(cuid())
-  name            String
-  businessId      String?
-  email           String?
-  phone           String?
-  address         String?
-  city            String?
-  postalCode      String?
-  country         String   @default("FI")
-  type            String   @default("customer")
-  companyId       String
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  invoices        Invoice[]
-  
-  @@map("customers")
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  account         Account     @relation(fields: [accountId], references: [id])
 }
 
 model Invoice {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   invoiceNumber   String
   customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id])
   issueDate       DateTime
   dueDate         DateTime
-  status          String   @default("draft")
+  status          String        @default("draft")
   subtotal        Float
   vatAmount       Float
   total           Float
-  notes           String?
   companyId       String
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   
+  company         Company       @relation(fields: [companyId], references: [id])
+  customer        Customer      @relation(fields: [customerId], references: [id])
   lines           InvoiceLine[]
-  
-  @@unique([companyId, invoiceNumber])
-  @@map("invoices")
 }
 
 model InvoiceLine {
   id              String   @id @default(cuid())
   invoiceId       String
-  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   description     String
   quantity        Float
   unitPrice       Float
   vatRate         Float
   amount          Float
   
-  @@map("invoice_lines")
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Customer {
+  id              String    @id @default(cuid())
+  name            String
+  businessId      String?
+  address         String?
+  city            String?
+  postalCode      String?
+  country         String?
+  email           String?
+  phone           String?
+  companyId       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  company         Company   @relation(fields: [companyId], references: [id])
+  invoices        Invoice[]
 }
 
 model Expense {
   id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
   date            DateTime
-  amount          Float
-  category        String
   description     String
+  amount          Float
+  vatAmount       Float?
+  category        String?
+  supplier        String?
   receiptUrl      String?
-  status          String   @default("pending")
   companyId       String
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
-  @@map("expenses")
+  company         Company  @relation(fields: [companyId], references: [id])
 }
