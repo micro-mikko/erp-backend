@@ -41,6 +41,7 @@ model User {
   updatedAt     DateTime @updatedAt
   
   company       Company  @relation(fields: [companyId], references: [id])
+  approvedTransactions Transaction[]
 }
 
 model Account {
@@ -67,11 +68,14 @@ model Transaction {
   description     String
   categoryId      String?
   subcategoryId   String?
+  approvedBy      String?
+  approvedAt      DateTime?
   companyId       String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   
   company         Company           @relation(fields: [companyId], references: [id])
+  approver        User?             @relation(fields: [approvedBy], references: [id])
   lines           TransactionLine[]
 }
 

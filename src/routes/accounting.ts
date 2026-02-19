@@ -159,3 +159,38 @@ router.delete('/transactions/:id', async (req: AuthRequest, res) => {
 });
 
 export { router as accountingRouter };
+
+router.post('/transactions/:id/approve', async (req: AuthRequest, res) => {
+  try {
+    if (req.user!.role !== 'admin' && req.user!.role !== 'accountant') {
+      return res.status(403).json({ error: 'Only admins and accountants can approve' });
+    }
+    
+    const transaction = await prisma.transaction.update({
+      where: { id: req.params.id },
+      data: {
+        approvedBy: req.user!.userId,
+        approvedAt: new Date()
+      },
+      include: {
+        approver: {
+          select: {
+            name: true,
+            email: true
+          }
+        },
+        lines: {
+          include: {
+            account: true
+          }
+        }
+      }
+    });
+    
+    res.json(transaction);
+    
+  } catch (error) {
+    console.error('Error approving transaction:', error);
+    res.status(500).json({ error: 'Could not approve transaction' });
+  }
+});
