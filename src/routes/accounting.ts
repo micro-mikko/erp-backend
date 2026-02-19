@@ -55,7 +55,7 @@ router.get('/transactions', async (req: AuthRequest, res) => {
 
 router.post('/transactions', async (req: AuthRequest, res) => {
   try {
-    const { date, description, lines } = req.body;
+    const { date, description, lines, categoryId, subcategoryId } = req.body;
     
     const lastTransaction = await prisma.transaction.findFirst({
       where: { companyId: req.user!.companyId },
@@ -71,12 +71,16 @@ router.post('/transactions', async (req: AuthRequest, res) => {
         date: new Date(date),
         description,
         voucherNumber,
+        categoryId: categoryId || null,
+        subcategoryId: subcategoryId || null,
         lines: {
           create: lines.map((line: any) => ({
             accountId: line.accountId,
             debit: line.debit || 0,
             credit: line.credit || 0,
-            description: line.description
+            description: line.description,
+            vatRate: line.vatRate,
+            vatAmount: line.vatAmount
           }))
         }
       },
@@ -99,25 +103,27 @@ router.post('/transactions', async (req: AuthRequest, res) => {
 
 router.put('/transactions/:id', async (req: AuthRequest, res) => {
   try {
-    const { date, description, lines } = req.body;
+    const { date, description, lines, categoryId, subcategoryId } = req.body;
     
-    // Ta bort gamla rader
     await prisma.transactionLine.deleteMany({
       where: { transactionId: req.params.id }
     });
     
-    // Uppdatera transaction med nya rader
     const transaction = await prisma.transaction.update({
       where: { id: req.params.id },
       data: {
         date: new Date(date),
         description,
+        categoryId: categoryId || null,
+        subcategoryId: subcategoryId || null,
         lines: {
           create: lines.map((line: any) => ({
             accountId: line.accountId,
             debit: line.debit || 0,
             credit: line.credit || 0,
-            description: line.description
+            description: line.description,
+            vatRate: line.vatRate,
+            vatAmount: line.vatAmount
           }))
         }
       },
